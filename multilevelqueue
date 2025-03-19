@@ -1,0 +1,99 @@
+#include <stdio.h>
+
+#define MAX 10
+
+void sortByArrival(int p[], int at[], int bt[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (at[j] > at[j + 1]) {
+                int temp;
+
+                temp = at[j];
+                at[j] = at[j + 1];
+                at[j + 1] = temp;
+
+                temp = bt[j];
+                bt[j] = bt[j + 1];
+                bt[j + 1] = temp;
+
+                temp = p[j];
+                p[j] = p[j + 1];
+                p[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void scheduleProcesses(int p[], int at[], int bt[], int priority[], int n) {
+    int sys_p[MAX], sys_at[MAX], sys_bt[MAX];
+    int user_p[MAX], user_at[MAX], user_bt[MAX];
+    int sys_count = 0, user_count = 0;
+    int tat[MAX], wt[MAX];
+    float total_tat = 0, total_wt = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (priority[i] == 0) {
+            sys_p[sys_count] = p[i];
+            sys_at[sys_count] = at[i];
+            sys_bt[sys_count++] = bt[i];
+        } else {
+            user_p[user_count] = p[i];
+            user_at[user_count] = at[i];
+            user_bt[user_count++] = bt[i];
+        }
+    }
+
+    sortByArrival(sys_p, sys_at, sys_bt, sys_count);
+    sortByArrival(user_p, user_at, user_bt, user_count);
+
+    int time = 0;
+    printf("\nExecution Order:\n");
+
+    for (int i = 0; i < sys_count; i++) {
+        printf("System Process P%d starts at time %d\n", sys_p[i], time);
+        time += sys_bt[i];
+        printf("System Process P%d ends at time %d\n", sys_p[i], time);
+
+        tat[sys_p[i] - 1] = time - sys_at[i];
+        wt[sys_p[i] - 1] = tat[sys_p[i] - 1] - sys_bt[i];
+        total_tat += tat[sys_p[i] - 1];
+        total_wt += wt[sys_p[i] - 1];
+    }
+
+    for (int i = 0; i < user_count; i++) {
+        printf("User Process P%d starts at time %d\n", user_p[i], time);
+        time += user_bt[i];
+        printf("User Process P%d ends at time %d\n", user_p[i], time);
+
+        tat[user_p[i] - 1] = time - user_at[i];
+        wt[user_p[i] - 1] = tat[user_p[i] - 1] - user_bt[i];
+        total_tat += tat[user_p[i] - 1];
+        total_wt += wt[user_p[i] - 1];
+    }
+
+    printf("\nProcess\tTAT\tWT\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\n", p[i], tat[i], wt[i]);
+    }
+
+    printf("\nAverage Turnaround Time: %.2f\n", total_tat / n);
+    printf("Average Waiting Time: %.2f\n", total_wt / n);
+}
+
+int main() {
+    int n;
+    int p[MAX], at[MAX], bt[MAX], priority[MAX];
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    printf("Enter process details (PID, Arrival Time, Burst Time, Priority [0-System, 1-User]):\n");
+    for (int i = 0; i < n; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d %d %d %d", &p[i], &at[i], &bt[i], &priority[i]);
+    }
+
+    scheduleProcesses(p, at, bt, priority, n);
+
+    return 0;
+}
