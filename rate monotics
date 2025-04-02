@@ -1,0 +1,62 @@
+#include <stdio.h>
+
+#define MAX_TASKS 5
+
+typedef struct {
+    int id;
+    int period;
+    int execution_time;
+    int remaining_time;
+} Task;
+
+void rate_monotonic_scheduling(Task tasks[], int num_tasks, int hyper_period) {
+    printf("\nRate Monotonic Scheduling Simulation:\n");
+    for (int time = 0; time < hyper_period; time++) {
+        int selected_task = -1;
+        for (int i = 0; i < num_tasks; i++) {
+            if (time % tasks[i].period == 0) {
+                tasks[i].remaining_time = tasks[i].execution_time;
+            }
+            if (tasks[i].remaining_time > 0) {
+                if (selected_task == -1 || tasks[i].period < tasks[selected_task].period) {
+                    selected_task = i;
+                }
+            }
+        }
+        if (selected_task != -1) {
+            printf("Time %d: Task %d executing\n", time, tasks[selected_task].id);
+            tasks[selected_task].remaining_time--;
+        } else {
+            printf("Time %d: Idle\n", time);
+        }
+    }
+}
+
+int main() {
+    int num_tasks;
+    printf("Enter number of tasks (max %d): ", MAX_TASKS);
+    scanf("%d", &num_tasks);
+
+    if (num_tasks > MAX_TASKS || num_tasks <= 0) {
+        printf("Invalid number of tasks!\n");
+        return 1;
+    }
+
+    Task tasks[MAX_TASKS];
+    printf("Enter task details (ID, period, execution time):\n");
+    for (int i = 0; i < num_tasks; i++) {
+        scanf("%d %d %d", &tasks[i].id, &tasks[i].period, &tasks[i].execution_time);
+        tasks[i].remaining_time = 0;
+    }
+
+
+    int hyper_period = 1;
+    for (int i = 0; i < num_tasks; i++) {
+        int a = hyper_period, b = tasks[i].period;
+        while (b) { int temp = b; b = a % b; a = temp; }
+        hyper_period = (hyper_period * tasks[i].period) / a;
+    }
+
+    rate_monotonic_scheduling(tasks, num_tasks, hyper_period);
+    return 0;
+}
