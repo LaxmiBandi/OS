@@ -1,0 +1,74 @@
+#include<stdio.h>
+#include <time.h>
+int n;
+int a[10][10],p[10][10];
+void read()
+{
+    printf("enter n:");
+    scanf("%d",&n);
+    for(int i=0;i<n;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            scanf("%d",&a[i][j]);
+        }
+    }
+}
+void write()
+{
+    printf("path matrix\n");
+    for(int i=0;i<n;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            printf("%d",p[i][j]);
+            printf(" ");
+        }
+        printf("\n");
+    }
+}
+void path()
+{
+    int i,j,k;
+    for( i=0;i<n;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            p[i][j]=a[i][j];
+        }
+
+    }
+    for (k=0;k<n;k++)
+    {
+        for(i=0;i<n;i++)
+        {
+            for(j=0;j<n;j++)
+            {
+                if(p[i][k]==1 && p[k][j])
+                {
+                    p[i][j]=1;
+                }
+
+            }
+        }
+    }
+}
+
+
+
+int main() {
+    clock_t end, start;
+
+    read(); // Read input
+    start = clock(); // Start timer
+    path(); // Compute shortest paths
+    end = clock(); // Stop timer
+
+    double total = (double)(end - start) / CLOCKS_PER_SEC; // Calculate time taken
+    printf("Time taken: %f seconds\n", total); // Print time taken
+
+    write(); // Write output
+    getch(); // Wait for user input before closing
+    return 0;
+}
+
