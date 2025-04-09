@@ -1,0 +1,123 @@
+#include <stdio.h>
+
+#define MAX 5
+
+int hungry[MAX] = {0};
+int totalPhilosophers;
+int hungryCount;
+int hungryPhilosophers[MAX];
+
+void oneCanEatAtATime() {
+    printf("Allow one philosopher to eat at any time\n");
+
+    int finished[MAX] = {0};
+    for (int i = 0; i < hungryCount; i++) {
+
+        for (int j = 0; j < hungryCount; j++) {
+            if (!finished[j]) {
+                printf("P %d is waiting\n", hungryPhilosophers[j]);
+            }
+        }
+        printf("P %d is granted to eat\n", hungryPhilosophers[i]);
+        printf("P %d has finished eating\n", hungryPhilosophers[i]);
+        finished[i] = 1;
+    }
+}
+void twoCanEatAtATime() {
+    printf("Allow two philosophers to eat at any time\n");
+
+    int finished[MAX] = {0};
+    int eating[MAX] = {0};
+
+    int totalFinished = 0;
+
+    while (totalFinished < hungryCount) {
+        int eatCount = 0;
+
+        for (int i = 0; i < hungryCount && eatCount < 2; i++) {
+            int p = hungryPhilosophers[i];
+
+            if (finished[i]) continue;
+
+            // Check if neighbors are eating
+            int left = (p - 2 + totalPhilosophers) % totalPhilosophers;
+            int right = p % totalPhilosophers;
+
+            int leftPhilosopher = -1, rightPhilosopher = -1;
+
+            // Get indices of left and right philosophers in the hungryPhilosophers array
+            for (int j = 0; j < hungryCount; j++) {
+                if (hungryPhilosophers[j] - 1 == left) leftPhilosopher = j;
+                if (hungryPhilosophers[j] - 1 == right) rightPhilosopher = j;
+            }
+
+            int leftEating = (leftPhilosopher != -1) ? eating[leftPhilosopher] : 0;
+            int rightEating = (rightPhilosopher != -1) ? eating[rightPhilosopher] : 0;
+
+            if (!leftEating && !rightEating) {
+                printf("P %d is granted to eat\n", p);
+                eating[i] = 1;
+                eatCount++;
+            }
+        }
+
+        // Finish eating phase
+        for (int i = 0; i < hungryCount; i++) {
+            if (eating[i]) {
+                printf("P %d has finished eating\n", hungryPhilosophers[i]);
+                finished[i] = 1;
+                eating[i] = 0;
+                totalFinished++;
+            }
+        }
+
+        // Show waiting status
+        for (int i = 0; i < hungryCount; i++) {
+            if (!finished[i]) {
+                printf("P %d is waiting\n", hungryPhilosophers[i]);
+            }
+        }
+    }
+}
+
+
+int main() {
+    printf("Enter the total number of philosophers: ");
+    scanf("%d", &totalPhilosophers);
+
+    printf("How many are hungry: ");
+    scanf("%d", &hungryCount);
+
+    for (int i = 0; i < hungryCount; i++) {
+        printf("Enter philosopher %d position (1 to %d): ", i + 1, totalPhilosophers);
+        scanf("%d", &hungryPhilosophers[i]);
+        hungry[hungryPhilosophers[i] - 1] = 1;
+    }
+
+    int choice;
+    do {
+        printf("\n1. One can eat at a time\n");
+        printf("2. Two can eat at a time\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                oneCanEatAtATime();
+                break;
+            case 2:
+                twoCanEatAtATime();
+                printf("Two can eat at a time logic not yet implemented.\n");
+                break;
+            case 3:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice.\n");
+        }
+    } while (choice != 3);
+
+    return 0;
+}
+
