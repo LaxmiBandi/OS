@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <limits.h> // For INT_MAX
+
+#define MAX 10
+
+int n;
+int cost[MAX][MAX];
+int visited[MAX];
+int min_cost = INT_MAX;
+int final_path[MAX];
+
+// Function to calculate total cost of current path
+int calculateCost(int path[]) {
+    int total = 0;
+    for (int i = 0; i < n - 1; i++) {
+        total += cost[path[i]][path[i + 1]];
+    }
+    total += cost[path[n - 1]][path[0]]; // return to start
+    return total;
+}
+
+// Swap two integers
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Generate all permutations and find minimum cost
+void permute(int path[], int l, int r) {
+    if (l == r) {
+        int current_cost = calculateCost(path);
+        if (current_cost < min_cost) {
+            min_cost = current_cost;
+            for (int i = 0; i < n; i++) {
+                final_path[i] = path[i];
+            }
+        }
+    } else {
+        for (int i = l; i <= r; i++) {
+            swap(&path[l], &path[i]);
+            permute(path, l + 1, r);
+            swap(&path[l], &path[i]); // backtrack
+        }
+    }
+}
+
+int main() {
+    printf("Enter the number of cities: ");
+    scanf("%d", &n);
+
+    printf("Enter the cost matrix:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Enter costs from city %d to others:\n", i);
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &cost[i][j]);
+        }
+    }
+
+    int path[MAX];
+    for (int i = 0; i < n; i++) {
+        path[i] = i;
+    }
+
+    permute(path, 1, n - 1); // Fix starting city at 0, permute rest
+
+    printf("\nMinimum cost path: ");
+    printf("0 ");
+    for (int i = 1; i < n; i++) {
+        printf("-> %d ", final_path[i]);
+    }
+    printf("-> 0\n");
+    printf("Minimum cost: %d\n", min_cost);
+
+    return 0;
+}
