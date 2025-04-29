@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <limits.h>
+
+// Function to calculate the total cost of a particular assignment
+int calculateCost(int costMatrix[][3], int assignment[], int n) {
+    int totalCost = 0;
+    for (int i = 0; i < n; i++) {
+        totalCost += costMatrix[i][assignment[i]];
+    }
+    return totalCost;
+}
+
+// Function to generate all permutations of the job assignments and calculate the minimum cost
+void jobAssignmentBruteForce(int costMatrix[][3], int n) {
+    int assignment[n];
+    int minCost = INT_MAX; // Initialize with a large number
+    int bestAssignment[n];
+
+    // Generate all permutations of job assignments
+    // There are n! permutations, so we need to check each one
+    for (int i = 0; i < (1 << n); i++) {
+        // Generate a permutation of job assignments
+        for (int j = 0; j < n; j++) {
+            assignment[j] = (i >> j) & 1;
+        }
+
+        // Calculate the total cost of this assignment
+        int totalCost = calculateCost(costMatrix, assignment, n);
+
+        // Update if this assignment is better (lower cost) than previous
+        if (totalCost < minCost) {
+            minCost = totalCost;
+            for (int k = 0; k < n; k++) {
+                bestAssignment[k] = assignment[k];
+            }
+        }
+    }
+
+    // Output the best assignment and its corresponding minimum cost
+    printf("Optimal job assignment:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Job %d is assigned to Worker %d\n", i + 1, bestAssignment[i] + 1);
+    }
+    printf("Minimum cost: %d\n", minCost);
+}
+
+int main() {
+    int costMatrix[3][3] = {
+        {9, 2, 7},
+        {6, 4, 3},
+        {5, 8, 1}
+    };
+
+    int n = 3; // Number of jobs and workers
+
+    // Call the brute force function to find the best job assignment
+    jobAssignmentBruteForce(costMatrix, n);
+
+    return 0;
+}
