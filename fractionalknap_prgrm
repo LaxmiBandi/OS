@@ -1,0 +1,67 @@
+#include <stdio.h>
+
+void swap(float* a, float* b) {
+    float temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void sortItems(int n, float value[], float weight[], float ratio[]) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (ratio[j] < ratio[j + 1]) {
+                swap(&ratio[j], &ratio[j + 1]);
+                swap(&value[j], &value[j + 1]);
+                swap(&weight[j], &weight[j + 1]);
+            }
+        }
+    }
+}
+
+void fractionalKnapsack(int n, float value[], float weight[], float ratio[], float capacity) {
+    float totalValue = 0;
+
+    sortItems(n, value, weight, ratio);
+
+    printf("\nItems after sorting by value/weight ratio:\n");
+    printf("Item\tValue\tWeight\tRatio\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%.2f\t%.2f\t%.2f\n", i + 1, value[i], weight[i], ratio[i]);
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (capacity >= weight[i]) {
+            capacity -= weight[i];
+            totalValue += value[i];
+        } else {
+            totalValue += ratio[i] * capacity;
+            break;
+        }
+    }
+
+    printf("\nMaximum value in the knapsack = %.2f\n", totalValue);
+}
+
+int main() {
+    int n;
+    float capacity;
+
+    printf("Enter the number of items: ");
+    scanf("%d", &n);
+
+    float value[n], weight[n], ratio[n];
+
+    printf("Enter the value and weight of each item:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Item %d (value weight): ", i + 1);
+        scanf("%f %f", &value[i], &weight[i]);
+        ratio[i] = value[i] / weight[i];
+    }
+
+    printf("Enter the capacity of the knapsack: ");
+    scanf("%f", &capacity);
+
+    fractionalKnapsack(n, value, weight, ratio, capacity);
+
+    return 0;
+}
