@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+int main() {
+    int totalBlocks;
+
+    printf("Enter total number of disk blocks: ");
+    scanf("%d", &totalBlocks);
+
+
+    int *memory = (int *)calloc(totalBlocks, sizeof(int)); // 0 = free, 1 = allocated
+
+    if (memory == NULL) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
+
+    int nFiles;
+    printf("Enter number of files: ");
+    scanf("%d", &nFiles);
+
+    for (int i = 1; i <= nFiles; i++) {
+        int startBlock, length;
+        printf("\nEnter starting block and length of file %d: ", i + 1);
+        scanf("%d%d", &startBlock, &length);
+
+        // Validate input
+        if (startBlock < 0 || startBlock + length > totalBlocks) {
+            printf("Invalid block range. File %d cannot be allocated.\n", i + 1);
+            continue;
+        }
+
+        bool canAllocate = true;
+        for (int j = startBlock; j < startBlock + length; j++) {
+            if (memory[j] == 1) {
+                canAllocate = false;
+                break;
+            }
+        }
+
+        if (canAllocate) {
+            for (int j = startBlock; j < startBlock + length; j++) {
+                memory[j] = 1;
+            }
+            printf("File %d allocated from block %d to %d\n", i + 1, startBlock, startBlock + length - 1);
+        } else {
+            printf("File %d cannot be allocated (Blocks already in use)\n", i + 1);
+        }
+    }
+
+    // Display memory map
+    printf("\nFinal Memory Allocation Status:\n");
+    for (int i = 0; i < totalBlocks; i++) {
+        printf("%d ", memory[i]);
+        if ((i + 1) % 20 == 0) printf("\n");
+    }
+
+    free(memory);
+    return 0;
+}
