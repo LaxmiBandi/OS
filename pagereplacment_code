@@ -1,0 +1,165 @@
+#include <stdio.h>
+#include <limits.h>
+
+void printFrames(int frames[], int f) {
+    for (int i = 0; i < f; i++) {
+        if (frames[i] == -1)
+            printf("- ");
+        else
+            printf("%d ", frames[i]);
+    }
+    printf("\n");
+}
+
+int isHit(int frames[], int f, int page) {
+    for (int i = 0; i < f; i++) {
+        if (frames[i] == page)
+            return 1;
+    }
+    return 0;
+}
+
+void FIFO(int pages[], int n, int f) {
+    int frames[f];
+    for (int i = 0; i < f; i++) frames[i] = -1;
+
+    int index = 0, faults = 0;
+
+    printf("FIFO Page Replacement Process:\n");
+    for (int i = 0; i < n; i++) {
+        if (!isHit(frames, f, pages[i])) {
+            frames[index] = pages[i];
+            index = (index + 1) % f;
+            faults++;
+            printf("PF No. %d: ", faults);
+            printFrames(frames, f);
+        }
+    }
+    printf("FIFO Page Faults: %d\n\n", faults);
+}
+
+int findLRU(int time[], int f) {
+    int min = time[0], pos = 0;
+    for (int i = 1; i < f; i++) {
+        if (time[i] < min) {
+            min = time[i];
+            pos = i;
+        }
+    }
+    return pos;
+}
+
+void LRU(int pages[], int n, int f) {
+    int frames[f], time[f];
+    for (int i = 0; i < f; i++) {
+        frames[i] = -1;
+        time[i] = 0;
+    }
+
+    int faults = 0, counter = 0;
+
+    printf("LRU Page Replacement Process:\n");
+    for (int i = 0; i < n; i++) {
+        int found = 0;
+        for (int j = 0; j < f; j++) {
+            if (frames[j] == pages[i]) {
+                counter++;
+                time[j] = counter;
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            int pos = -1;
+            for (int j = 0; j < f; j++) {
+                if (frames[j] == -1) {
+                    pos = j;
+                    break;
+                }
+            }
+            if (pos == -1)
+                pos = findLRU(time, f);
+
+            frames[pos] = pages[i];
+            counter++;
+            time[pos] = counter;
+            faults++;
+            printf("PF No. %d: ", faults);
+            printFrames(frames, f);
+        }
+    }
+    printf("LRU Page Faults: %d\n\n", faults);
+}
+
+int predict(int pages[], int frames[], int n, int index, int f) {
+    int res = -1, farthest = index;
+    for (int i = 0; i < f; i++) {
+        int j;
+        for (j = index; j < n; j++) {
+            if (frames[i] == pages[j]) {
+                if (j > farthest) {
+                    farthest = j;
+                    res = i;
+                }
+                break;
+            }
+        }
+
+        if (j == n)
+            return i;
+    }
+
+    return (res == -1) ? 0 : res;
+}
+
+void Optimal(int pages[], int n, int f) {
+    int frames[f];
+    for (int i = 0; i < f; i++) frames[i] = -1;
+
+    int faults = 0;
+
+    printf("Optimal Page Replacement Process:\n");
+    for (int i = 0; i < n; i++) {
+        if (!isHit(frames, f, pages[i])) {
+            int pos = -1;
+            for (int j = 0; j < f; j++) {
+                if (frames[j] == -1) {
+                    pos = j;
+                    break;
+                }
+            }
+
+            if (pos == -1)
+                pos = predict(pages, frames, n, i + 1, f);
+
+            frames[pos] = pages[i];
+            faults++;
+            printf("PF No. %d: ", faults);
+            printFrames(frames, f);
+        }
+    }
+    printf("Optimal Page Faults: %d\n", faults);
+}
+
+int main() {
+    int f, n;
+
+    printf("Enter the number of Frames: ");
+    scanf("%d", &f);
+
+    printf("Enter the length of reference string: ");
+    scanf("%d", &n);
+
+    int pages[n];
+    printf("Enter the reference string: ");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
+
+    printf("\n");
+    FIFO(pages, n, f);
+    LRU(pages, n, f);
+    Optimal(pages, n, f);
+
+    return 0;
+}
